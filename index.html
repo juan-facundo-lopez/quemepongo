@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="es" data-weather-theme="clear">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#ffb07c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Qué me pongo">
+  <meta name="description" content="Recomendaciones de ropa simples y personalizadas según el clima actual.">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>¿Qué me pongo?</title>
+  <link rel="icon" type="image/png" sizes="1025x1025" href="favicon.png?v=20260721-2">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180.png?v=20260721-pwa1">
+  <link rel="manifest" href="manifest.json?v=20260721-pwa1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index.css?v=20260723-wardrobe2">
+</head>
+<body>
+  <div id="weatherBg" class="clear" aria-hidden="true">
+    <div class="weather-glow"></div>
+    <div class="sunny-layer"><span class="sun-orb"></span></div>
+    <div class="cloudy-layer"><span></span><span></span><span></span></div>
+    <div class="rainy-layer"></div>
+    <div class="snowy-layer"></div>
+    <div class="windy-layer">
+      <div class="wind-line"></div><div class="wind-line"></div><div class="wind-line"></div>
+    </div>
+  </div>
+
+  <section class="auth-gate" id="authGate" aria-labelledby="authGateTitle" aria-busy="true">
+    <div class="auth-gate-card glass-card">
+      <div class="auth-gate-brand" aria-hidden="true"><img src="app-logo.png?v=20260721-1" alt=""></div>
+      <span class="eyebrow">Tu cuenta personal</span>
+      <h2 id="authGateTitle">Ingresá para continuar</h2>
+      <p>Cada persona entra con su Gmail y mantiene la sesión iniciada en este dispositivo.</p>
+      <button class="google-signin-button auth-gate-button" id="welcomeGoogleBtn" type="button" disabled>
+        <span class="google-mark" aria-hidden="true">G</span>
+        Continuar con Google
+      </button>
+      <p class="auth-status" id="authGateStatus" role="status" aria-live="polite">Comprobando sesión…</p>
+    </div>
+  </section>
+
+  <div class="app-container">
+    <header class="app-header">
+      <div class="brand-row">
+        <div class="brand-mark" aria-hidden="true"><img src="app-logo.png?v=20260721-1" alt=""></div>
+        <h1>¿Qué me pongo?</h1>
+      </div>
+      <button class="location-badge is-loading" id="locationBtn" type="button" aria-label="Actualizar ubicación" title="Actualizar ubicación">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-5.2 7-12A7 7 0 1 0 5 9c0 6.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg>
+        <span id="locationText">Buscando ubicación...</span>
+        <span class="loading-dot" id="loadingDot" aria-hidden="true"></span>
+        <span class="location-action" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M20 6v5h-5M4 18v-5h5"/><path d="M18.5 10a7 7 0 0 0-12-3L4 10m16 4-2.5 3a7 7 0 0 1-12-3"/></svg>
+        </span>
+      </button>
+    </header>
+
+    <main class="main-panel">
+      <section class="view active view-entering" id="homeView" aria-labelledby="homeTab">
+        <article class="hero-card glass-card" id="heroCard">
+          <div class="hero-topline">
+            <span class="eyebrow">Tu look de hoy</span>
+            <span class="now-badge"><i></i> Ahora</span>
+          </div>
+          <button class="weather-alert" id="weatherAlert" type="button" data-metric="rain" aria-haspopup="dialog" hidden>
+            <span class="weather-alert-icon" id="weatherAlertIcon" aria-hidden="true"></span>
+            <span class="weather-alert-copy">
+              <small id="weatherAlertLabel">Aviso para salir</small>
+              <strong id="weatherAlertText"></strong>
+            </span>
+            <svg class="weather-alert-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+          <div class="later-actions" role="group" aria-label="Momento de la salida">
+            <button class="now-button active" id="nowBtn" type="button" aria-pressed="true">Ahora</button>
+            <button class="later-button" id="laterBtn" type="button" aria-pressed="false" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              <span>Salgo más tarde</span>
+            </button>
+          </div>
+          <div class="occasion-selector">
+            <span class="occasion-label" id="occasionLabel">¿Para qué te vestís?</span>
+            <div class="occasion-options" role="group" aria-labelledby="occasionLabel">
+              <button class="occasion-button active" type="button" data-outfit-occasion="casual" aria-pressed="true">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14v11H5Z"/><path d="M9 8V5h6v3M5 12h14M10 12v2h4v-2"/></svg>
+                Casual
+              </button>
+              <button class="occasion-button" type="button" data-outfit-occasion="training" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9v6m12-6v6M3 11v2m18-2v2M6 12h12"/></svg>
+                Entrenar
+              </button>
+            </div>
+          </div>
+          <div class="garment-visual-container" id="garmentVisual" aria-live="polite">
+            <span class="garment-item skeleton-box"></span><span class="garment-item skeleton-box"></span>
+          </div>
+          <div class="hero-copy">
+            <h2 id="outfitTitle"><span class="skeleton-line wide"></span></h2>
+            <p id="outfitContext"><span class="skeleton-line"></span><span class="skeleton-line short"></span></p>
+          </div>
+          <div class="outfit-breakdown" id="outfitDetails" aria-label="Look completo">
+            <div class="outfit-detail skeleton-detail"></div>
+            <div class="outfit-detail skeleton-detail"></div>
+          </div>
+          <div class="chip-row" id="outfitChips"></div>
+        </article>
+
+        <div class="dashboard-side">
+        <article class="weather-card glass-card">
+          <div class="feels-block">
+            <span class="metric-label">Sensación</span>
+            <strong id="feelsLikeTemp">—°</strong>
+            <span class="metric-caption">Lo que se siente</span>
+          </div>
+          <div class="weather-details">
+            <div><span>Temperatura</span><strong id="actualTemp">—°</strong></div>
+            <div><span>Mín. / Máx.</span><strong id="minMaxTemp">—° / —°</strong></div>
+            <div><span>Humedad</span><strong id="humidityVal">—%</strong></div>
+          </div>
+          <div class="day-comparison" id="dayComparison" hidden>
+            <div class="comparison-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M10 14.8V5a2 2 0 0 1 4 0v9.8a4 4 0 1 1-4 0Z"/><path d="M12 12v6"/></svg>
+            </div>
+            <div class="comparison-copy">
+              <span id="comparisonLabel">Comparación con ayer</span>
+              <strong id="comparisonText">Calculando diferencia...</strong>
+            </div>
+            <div class="comparison-delta" id="comparisonDelta" aria-label="Diferencia de temperatura">—</div>
+          </div>
+        </article>
+
+        <div class="metrics-grid" aria-label="Métricas adicionales del clima">
+          <button class="metric-card glass-card" type="button" data-metric="uv" aria-haspopup="dialog" aria-label="Ver información del índice UV" disabled>
+            <div class="metric-icon uv-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></div>
+            <span>Índice UV</span><strong id="uvIndexVal">—</strong><small id="uvStatus">Cargando</small>
+          </button>
+          <button class="metric-card glass-card" type="button" data-metric="wind" aria-haspopup="dialog" aria-label="Ver información del viento" disabled>
+            <div class="metric-icon wind-icon"><svg viewBox="0 0 24 24"><path d="M3 8h11.5a2.5 2.5 0 1 0-2.2-3.7M3 12h16a2 2 0 1 1-1.7 3M3 16h8"/></svg></div>
+            <span>Viento</span><strong id="windSpeedVal">—</strong><small id="windStatus">Cargando</small>
+          </button>
+          <button class="metric-card glass-card" type="button" data-metric="rain" aria-haspopup="dialog" aria-label="Ver información de la probabilidad de lluvia" disabled>
+            <div class="metric-icon rain-icon"><svg viewBox="0 0 24 24"><path d="M7 17h10a4 4 0 0 0 .5-8A6 6 0 0 0 6.2 8 4.5 4.5 0 0 0 7 17Z"/><path d="m9 20-1 2m5-2-1 2m5-2-1 2"/></svg></div>
+            <span>Prob. lluvia</span><strong id="rainProbVal">—%</strong><small id="rainStatus">Cargando</small>
+          </button>
+        </div>
+        <p class="update-time" id="updateTime" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <section class="view" id="wardrobeView" aria-labelledby="wardrobeTab" hidden>
+        <div class="wardrobe-heading">
+          <div>
+            <span class="eyebrow">Tu guardarropa</span>
+            <h2>Mi ropa</h2>
+            <p class="wardrobe-subtitle" id="wardrobeCount">Todavía no agregaste prendas</p>
+            <p class="ai-quota-summary" id="aiQuotaSummary" aria-live="polite">IA: consultando disponibilidad…</p>
+          </div>
+          <button class="wardrobe-add-button" id="addGarmentBtn" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            <span>Agregar</span>
+          </button>
+        </div>
+
+        <section class="wardrobe-insights" id="wardrobeInsights" aria-live="polite" hidden></section>
+
+        <article class="wardrobe-empty glass-card" id="wardrobeEmpty">
+          <div class="empty-closet" aria-hidden="true">
+            <svg viewBox="0 0 120 120"><rect x="23" y="16" width="74" height="88" rx="15"/><path d="M60 16v88M32 31h56M43 54h3m28 0h3M50 75c0-7 20-7 20 0l9 7-4 8-5-3v11H50V87l-5 3-4-8 9-7Z"/></svg>
+          </div>
+          <h3>Tu ropa, siempre a mano</h3>
+          <p>Agregá una prenda con una foto y elegí si querés completar los datos o probar el análisis con IA.</p>
+          <button class="wardrobe-primary-button" id="addGarmentEmptyBtn" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l1.5-2h7L17 7h3v12H4Z"/><circle cx="12" cy="13" r="3.5"/></svg>
+            Agregar prenda
+          </button>
+        </article>
+
+        <div class="wardrobe-grid" id="wardrobeGrid" aria-live="polite" hidden></div>
+        <p class="wardrobe-local-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"/><path d="M12 11v5m0-8h.01"/></svg>Tus prendas se guardan en tu cuenta para usarlas en otros dispositivos.</p>
+        <p class="wardrobe-toast" id="wardrobeToast" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="view" id="settingsView" aria-labelledby="settingsTab" hidden>
+        <div class="section-heading"><span class="eyebrow">Personalizá tu experiencia</span><h2>Configuración</h2></div>
+        <article class="auth-card glass-card" id="authCard">
+          <div class="auth-summary">
+            <div class="auth-avatar" id="authAvatar" aria-hidden="true"><span>G</span></div>
+            <div class="auth-copy">
+              <span class="eyebrow">Tu cuenta</span>
+              <h3 id="authTitle">Ingresá con Google</h3>
+              <p id="authDescription">Así cada persona puede tener su propio usuario.</p>
+            </div>
+          </div>
+          <button class="google-signin-button" id="googleSignInBtn" type="button">
+            <span class="google-mark" aria-hidden="true">G</span>
+            Continuar con Google
+          </button>
+          <button class="auth-signout-button" id="authSignOutBtn" type="button" hidden>Cerrar sesión</button>
+          <p class="auth-status" id="authStatus" role="status" aria-live="polite"></p>
+        </article>
+        <form class="settings-form" id="settingsForm">
+          <article class="setting-card glass-card">
+            <div class="setting-copy"><h3>Unidad de temperatura</h3><p>Elegí cómo mostrar los grados.</p></div>
+            <button class="unit-toggle celsius" id="unitToggle" type="button" aria-label="Cambiar unidad de temperatura" aria-pressed="false">
+              <span>°C</span><i></i><span>°F</span>
+            </button>
+          </article>
+
+          <fieldset class="setting-card glass-card sensitivity-fieldset">
+            <legend>Sensibilidad al frío</legend>
+            <p>Ajustamos el abrigo recomendado a vos.</p>
+            <div class="radio-grid">
+              <label><input type="radio" name="tempSensitivity" value="cold"><span><b>Friolento/a</b><small>Más abrigo</small></span></label>
+              <label><input type="radio" name="tempSensitivity" value="normal" checked><span><b>Normal</b><small>Equilibrado</small></span></label>
+              <label><input type="radio" name="tempSensitivity" value="hot"><span><b>Caluroso/a</b><small>Más liviano</small></span></label>
+            </div>
+          </fieldset>
+
+          <article class="setting-card glass-card select-card">
+            <label for="fallbackLocationSelect"><b>Ubicación alternativa</b><span>Al elegirla, mostramos su clima. El botón superior vuelve al GPS.</span></label>
+            <div class="select-wrap">
+              <select id="fallbackLocationSelect">
+                <option value="buenosAires">Buenos Aires</option><option value="bariloche">Bariloche</option>
+                <option value="madrid">Madrid</option>
+                <option value="torino">Torino</option><option value="barcelona">Barcelona</option>
+                <option value="copenhagen">Copenhague</option><option value="galicia">Galicia</option>
+                <option value="santiago">Santiago</option><option value="cdmx">Ciudad de México</option>
+                <option value="miami">Miami</option><option value="london">Londres</option>
+              </select>
+              <svg viewBox="0 0 24 24"><path d="m7 9 5 5 5-5"/></svg>
+            </div>
+          </article>
+          <p class="save-feedback" id="saveFeedback" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <nav class="nav-pill" aria-label="Navegación principal">
+    <button class="nav-item active" id="homeTab" type="button" data-view="homeView" aria-current="page">
+      <svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg><span>Inicio</span>
+    </button>
+    <button class="nav-item" id="wardrobeTab" type="button" data-view="wardrobeView">
+      <svg viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v16H3V5a2 2 0 0 1 2-2Zm7 0v18M8 11h1m6 0h1"/></svg><span>Mi ropa</span>
+    </button>
+    <button class="nav-item" id="settingsTab" type="button" data-view="settingsView">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg><span>Ajustes</span>
+    </button>
+  </nav>
+
+  <aside class="install-prompt glass-card" id="installPrompt" aria-label="Instalar aplicación" hidden>
+    <img class="install-prompt-icon" src="icons/icon-192.png?v=20260721-pwa1" alt="">
+    <div class="install-prompt-content">
+      <strong id="installPromptTitle">Instalá ¿Qué me pongo?</strong>
+      <p id="installPromptText">Tené la app siempre a mano en tu teléfono.</p>
+      <p class="install-ios-instructions" id="installIosInstructions" hidden><span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 16V3m0 0L8 7m4-4 4 4M5 12v8h14v-8"/></svg></span>Tocá Compartir y después “Agregar a pantalla de inicio”.</p>
+      <button class="install-prompt-action" id="installAppBtn" type="button" hidden>Instalar app</button>
+    </div>
+    <button class="install-prompt-close" id="closeInstallPrompt" type="button" aria-label="Ocultar durante 7 días">×</button>
+  </aside>
+
+  <dialog class="later-dialog" id="laterDialog" aria-labelledby="laterDialogTitle">
+    <div class="dialog-handle" aria-hidden="true"></div>
+    <div class="dialog-heading">
+      <div><span class="eyebrow">Planificá tu salida</span><h2 id="laterDialogTitle">¿A qué hora salís?</h2></div>
+      <button class="dialog-close" id="closeLaterDialog" type="button" aria-label="Cerrar">×</button>
+    </div>
+    <p>Elegí un horario y ajustamos el look al clima previsto.</p>
+    <div class="hour-options" id="hourOptions" aria-label="Horarios disponibles"></div>
+  </dialog>
+
+  <dialog class="later-dialog metric-dialog" id="metricInfoDialog" aria-labelledby="metricInfoTitle">
+    <div class="dialog-handle" aria-hidden="true"></div>
+    <div class="dialog-heading">
+      <div class="metric-dialog-heading">
+        <div class="metric-modal-icon" id="metricInfoIcon" aria-hidden="true"></div>
+        <div><span class="eyebrow" id="metricInfoEyebrow">Detalle del clima</span><h2 id="metricInfoTitle">Información</h2></div>
+      </div>
+      <button class="dialog-close" id="closeMetricInfo" type="button" aria-label="Cerrar información">×</button>
+    </div>
+    <div class="metric-modal-value"><strong id="metricInfoValue">—</strong><span id="metricInfoStatus"></span></div>
+    <p class="metric-summary" id="metricInfoSummary"></p>
+    <div class="metric-advice" id="metricInfoAdvice">
+      <span aria-hidden="true">✦</span>
+      <div><b>Consejo para vos</b><p id="metricInfoAdviceText"></p></div>
+    </div>
+  </dialog>
+
+  <dialog class="later-dialog outfit-swap-dialog" id="outfitSwapDialog" aria-labelledby="outfitSwapTitle">
+    <div class="dialog-handle" aria-hidden="true"></div>
+    <button class="dialog-close outfit-swap-close" id="closeOutfitSwap" type="button" aria-label="Cerrar opciones">×</button>
+    <div class="outfit-swap-heading">
+      <span class="eyebrow">Cambiar prenda</span>
+      <h2 id="outfitSwapTitle">Elegí otra opción</h2>
+      <p id="outfitSwapDescription">Te mostramos primero las que mejor combinan con el look.</p>
+    </div>
+    <div class="outfit-swap-options" id="outfitSwapOptions"></div>
+    <p class="outfit-swap-note">El cambio se aplica solamente a esta parte del look.</p>
+  </dialog>
+
+  <dialog class="recommendations-dialog" id="recommendationsDialog" aria-labelledby="recommendationsTitle">
+    <div class="recommendations-shell">
+      <header class="recommendations-header">
+        <button class="recommendations-back" id="recommendationsBack" type="button" aria-label="Volver a las recomendaciones" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+          <span>Volver</span>
+        </button>
+        <div class="recommendations-heading" id="recommendationsHeading">
+          <span class="eyebrow">Tu armario, mejor aprovechado</span>
+          <h2 id="recommendationsTitle">Mejorá tu armario</h2>
+          <p>Priorizamos las prendas que sumarían más combinaciones con lo que ya tenés.</p>
+        </div>
+        <button class="dialog-close recommendations-close" id="closeRecommendations" type="button" aria-label="Cerrar recomendaciones">×</button>
+      </header>
+
+      <section class="recommendations-overview" id="recommendationsOverview">
+        <div class="recommendation-filters" id="recommendationFilters" role="group" aria-label="Objetivo de las recomendaciones">
+          <button class="active" type="button" data-recommendation-filter="all" aria-pressed="true">Todo</button>
+          <button class="recommendation-saved-filter" type="button" data-recommendation-filter="saved" aria-pressed="false">
+            Guardadas <span id="recommendationSavedCount">0</span>
+          </button>
+          <button type="button" data-recommendation-filter="casual" aria-pressed="false">Día a día</button>
+          <button type="button" data-recommendation-filter="training" aria-pressed="false">Entrenar</button>
+          <button type="button" data-recommendation-filter="rain" aria-pressed="false">Lluvia</button>
+          <button type="button" data-recommendation-filter="cold" aria-pressed="false">Frío</button>
+        </div>
+        <div class="recommendations-list" id="recommendationsList"></div>
+      </section>
+
+      <section class="recommendation-detail" id="recommendationDetail" hidden></section>
+      <p class="recommendations-toast" id="recommendationsToast" role="status" aria-live="polite"></p>
+    </div>
+  </dialog>
+
+  <dialog class="later-dialog wardrobe-flow-dialog" id="garmentFlowDialog" aria-labelledby="garmentFlowTitle">
+    <div class="dialog-handle" aria-hidden="true"></div>
+    <button class="dialog-close wardrobe-flow-close" id="closeGarmentFlow" type="button" aria-label="Cerrar">×</button>
+
+    <section class="garment-stage" data-garment-stage="source">
+      <div class="garment-stage-heading">
+        <span class="eyebrow">Nueva prenda</span>
+        <h2 id="garmentFlowTitle">¿Cómo querés agregarla?</h2>
+        <p>Usá una foto con buena luz y la prenda lo más completa posible.</p>
+      </div>
+      <div class="photo-source-grid">
+        <button class="photo-source-option" id="openCameraBtn" type="button" aria-controls="cameraInput desktopCameraVideo">
+          <span class="source-icon camera-source"><svg viewBox="0 0 24 24"><path d="M4 7h3l1.5-2h7L17 7h3v12H4Z"/><circle cx="12" cy="13" r="3.5"/></svg></span>
+          <b>Sacar una foto</b>
+          <small>Usar cámara</small>
+        </button>
+        <label class="photo-source-option" for="galleryInput" role="button" tabindex="0" aria-controls="galleryInput">
+          <span class="source-icon gallery-source"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m4 17 5-4 3 3 3-2 5 4"/></svg></span>
+          <b>Elegir imagen</b>
+          <small>Desde galería</small>
+        </label>
+      </div>
+      <input class="file-input" id="cameraInput" type="file" accept="image/*" capture="environment" aria-label="Sacar una foto con la cámara trasera">
+      <input class="file-input" id="galleryInput" type="file" accept="image/*" aria-label="Elegir una imagen de la galería">
+      <p class="garment-flow-error" id="garmentFlowError" role="status"></p>
+    </section>
+
+    <section class="garment-stage desktop-camera-stage" data-garment-stage="camera" hidden>
+      <div class="garment-stage-heading compact">
+        <span class="eyebrow">Cámara</span>
+        <h2 id="desktopCameraTitle">Encuadrá la prenda</h2>
+        <p>Buscá buena luz y mostrala lo más completa posible.</p>
+      </div>
+      <div class="desktop-camera-frame">
+        <video id="desktopCameraVideo" autoplay playsinline muted aria-label="Vista previa de la cámara"></video>
+        <div class="desktop-camera-loading" id="desktopCameraLoading" role="status">Activando cámara…</div>
+      </div>
+      <p class="desktop-camera-status" id="desktopCameraStatus" role="status"></p>
+      <div class="desktop-camera-actions">
+        <button class="garment-cancel-button" id="cancelDesktopCamera" type="button">Volver</button>
+        <button class="camera-shutter-button" id="captureDesktopPhoto" type="button" disabled>
+          <span aria-hidden="true"></span>Tomar foto
+        </button>
+      </div>
+    </section>
+
+    <section class="garment-stage method-stage" data-garment-stage="method" hidden>
+      <div class="garment-stage-heading compact">
+        <span class="eyebrow">Foto lista</span>
+        <h2 id="garmentMethodTitle">¿Cómo querés completar los datos?</h2>
+        <p>Podés hacerlo manualmente o usar uno de tus análisis con IA.</p>
+      </div>
+      <div class="method-photo-wrap"><img id="methodGarmentImage" alt="Vista previa de la prenda"></div>
+      <button class="repeat-photo-button" id="repeatGarmentPhoto" type="button">Repetir foto</button>
+      <div class="garment-method-grid">
+        <button class="garment-method-option manual-method" id="manualGarmentBtn" type="button">
+          <span class="method-icon"><svg viewBox="0 0 24 24"><path d="m4 16-1 5 5-1L19 9l-4-4L4 16Z"/><path d="m13 7 4 4"/></svg></span>
+          <span><strong>Completar manualmente</strong><small>Elegís y corregís todos los datos de la prenda.</small></span>
+        </button>
+        <button class="garment-method-option ai-method" id="aiGarmentBtn" type="button">
+          <span class="method-icon"><svg viewBox="0 0 24 24"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z"/></svg></span>
+          <span class="method-copy"><b class="test-mode-badge">Gemini</b><strong>Analizar prenda</strong><small><span id="aiQuotaLimitedCopy"><span id="aiQuotaRemaining">5</span> de <span id="aiQuotaLimit">5</span> análisis disponibles</span><span id="aiQuotaUnlimitedCopy" hidden>Análisis ilimitados</span></small><em id="aiQuotaReset">Las 24 h empiezan con tu primer análisis.</em></span>
+        </button>
+      </div>
+      <div class="ai-quota-dots" id="aiQuotaDots" aria-hidden="true"></div>
+      <p class="garment-flow-error" id="aiQuotaError" role="status"></p>
+    </section>
+
+    <section class="garment-stage analyzing-stage" data-garment-stage="analyzing" hidden>
+      <div class="analysis-preview">
+        <img id="analysisImage" alt="Prenda seleccionada">
+        <span class="scan-line" aria-hidden="true"></span>
+      </div>
+      <div class="analysis-spinner" aria-hidden="true"><i></i><i></i><i></i></div>
+      <h2 id="garmentAnalysisTitle">Estoy mirando tu prenda…</h2>
+      <p>Reconociendo categoría, color y detalles visibles…</p>
+      <div class="analysis-progress" aria-hidden="true"><span></span></div>
+      <small>La foto se envía de forma segura al servidor para analizarla con Gemini.</small>
+    </section>
+
+    <section class="garment-stage confirm-stage" data-garment-stage="confirm" hidden>
+      <div class="garment-stage-heading compact">
+        <span class="eyebrow" id="garmentFormEyebrow">Resultado de Gemini</span>
+        <h2 id="garmentConfirmTitle">Revisá los datos</h2>
+        <p id="garmentFormDescription">Podés corregir todo antes de guardar.</p>
+      </div>
+      <div class="confirm-photo-wrap">
+        <img id="confirmGarmentImage" alt="Vista previa de la prenda">
+        <button class="change-photo-button" id="changeGarmentPhoto" type="button"><svg viewBox="0 0 24 24"><path d="M20 6v5h-5M4 18v-5h5"/><path d="M18.5 10a7 7 0 0 0-12-3L4 10m16 4-2.5 3a7 7 0 0 1-12-3"/></svg>Cambiar foto</button>
+      </div>
+
+      <form class="garment-form" id="garmentForm">
+        <div class="garment-select-grid">
+          <label><span>Categoría</span><select id="garmentCategory" required>
+            <option>Remera</option><option>Camisa</option><option>Buzo</option><option>Sweater</option><option>Campera</option><option>Abrigo</option><option>Pantalón</option><option>Short</option><option>Pollera</option><option>Vestido</option><option>Calzado</option><option>Accesorio</option><option>Otra</option>
+          </select></label>
+          <label><span>Color</span><select id="garmentColor" required>
+            <option>Negro</option><option>Blanco</option><option>Gris</option><option>Azul</option><option>Rojo</option><option>Verde</option><option>Beige</option><option>Marrón</option><option>Amarillo</option><option>Rosa</option><option>Violeta</option><option>Naranja</option><option>Multicolor</option><option>Sin definir</option>
+          </select></label>
+        </div>
+
+        <div class="garment-text-grid">
+          <label><span>Subtipo</span><input id="garmentSubtype" type="text" maxlength="100" placeholder="Ej. manga corta"></label>
+          <label><span>Colores secundarios</span><input id="garmentSecondaryColors" type="text" maxlength="180" placeholder="Separados por coma"></label>
+          <label><span>Estampado</span><select id="garmentPattern">
+            <option value="">Sin definir</option><option value="liso">Liso</option><option value="rayado">Rayado</option><option value="cuadros">Cuadros</option><option value="estampado">Estampado</option><option value="animal_print">Animal print</option><option value="lunares">Lunares</option><option value="otro">Otro</option>
+          </select></label>
+          <label><span>Material aproximado</span><input id="garmentMaterial" type="text" maxlength="100" placeholder="Ej. algodón"></label>
+        </div>
+
+        <fieldset class="garment-choice-group">
+          <legend>Nivel de abrigo</legend>
+          <div class="garment-choice-row garment-warmth-row">
+            <label><input type="radio" name="garmentWarmth" value="Muy liviano"><span>Muy liviano</span></label>
+            <label><input type="radio" name="garmentWarmth" value="Liviano"><span>Liviano</span></label>
+            <label><input type="radio" name="garmentWarmth" value="Medio" checked><span>Medio</span></label>
+            <label><input type="radio" name="garmentWarmth" value="Abrigado"><span>Abrigado</span></label>
+            <label><input type="radio" name="garmentWarmth" value="Muy abrigado"><span>Muy abrigado</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="garment-choice-group">
+          <legend>Temporadas</legend>
+          <div class="garment-check-row">
+            <label><input type="checkbox" name="garmentSeason" value="verano"><span>Verano</span></label>
+            <label><input type="checkbox" name="garmentSeason" value="otoño"><span>Otoño</span></label>
+            <label><input type="checkbox" name="garmentSeason" value="invierno"><span>Invierno</span></label>
+            <label><input type="checkbox" name="garmentSeason" value="primavera"><span>Primavera</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="garment-choice-group">
+          <legend>Estilo</legend>
+          <div class="garment-choice-row garment-style-row">
+            <label><input type="radio" name="garmentStyle" value="Casual" checked><span>Casual</span></label>
+            <label><input type="radio" name="garmentStyle" value="Formal"><span>Formal</span></label>
+            <label><input type="radio" name="garmentStyle" value="Deportivo"><span>Deportivo</span></label>
+            <label><input type="radio" name="garmentStyle" value="Urbano"><span>Urbano</span></label>
+          </div>
+        </fieldset>
+
+        <div class="garment-text-grid garment-extra-grid">
+          <label><span>Impermeable</span><select id="garmentWaterproof"><option value="">No se puede determinar</option><option value="1">Sí</option><option value="0">No</option></select></label>
+          <label><span>Ocasiones</span><input id="garmentOccasions" type="text" maxlength="180" placeholder="Ej. casual, trabajo"></label>
+        </div>
+        <label class="garment-description-field"><span>Descripción</span><textarea id="garmentDescription" maxlength="500" rows="3" placeholder="Descripción breve de la prenda"></textarea></label>
+        <p class="garment-confidence" id="garmentConfidence" hidden></p>
+
+        <p class="garment-save-error" id="garmentSaveError" role="status"></p>
+
+        <div class="garment-form-actions">
+          <button class="garment-cancel-button" id="cancelGarment" type="button">Cancelar</button>
+          <button class="garment-save-button" type="submit"><svg viewBox="0 0 24 24"><path d="M5 4h12l2 2v14H5Z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/></svg><span id="garmentSubmitLabel">Guardar prenda</span></button>
+        </div>
+      </form>
+    </section>
+  </dialog>
+
+  <dialog class="later-dialog garment-detail-dialog" id="garmentDetailDialog" aria-labelledby="garmentDetailTitle">
+    <div class="dialog-handle" aria-hidden="true"></div>
+    <button class="dialog-close garment-detail-close" id="closeGarmentDetail" type="button" aria-label="Cerrar detalle">×</button>
+    <div class="garment-detail-photo"><img id="garmentDetailImage" alt="Foto de la prenda"></div>
+    <span class="eyebrow">Prenda guardada</span>
+    <h2 id="garmentDetailTitle">Prenda</h2>
+    <p class="garment-detail-description" id="garmentDetailDescription" hidden></p>
+    <div class="garment-detail-tags" id="garmentDetailTags"></div>
+    <div class="garment-detail-actions" id="garmentDetailActions">
+      <button class="edit-garment-button" id="editGarmentBtn" type="button"><svg viewBox="0 0 24 24"><path d="m4 16-1 5 5-1L19 9l-4-4L4 16Z"/><path d="m13 7 4 4"/></svg>Editar prenda</button>
+      <button class="delete-garment-button" id="deleteGarmentBtn" type="button"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m4 4v5m4-5v5"/></svg>Eliminar prenda</button>
+    </div>
+    <div class="delete-confirmation" id="deleteConfirmation" hidden>
+      <p>¿Seguro que querés eliminarla?</p>
+      <div><button id="cancelDeleteGarment" type="button">No, mantener</button><button id="confirmDeleteGarment" type="button">Sí, eliminar</button></div>
+    </div>
+  </dialog>
+
+  <script src="pwa.js?v=20260723-wardrobe2"></script>
+  <script src="recommendations.js?v=20260723-wardrobe2"></script>
+  <script src="app.js?v=20260723-wardrobe2"></script>
+  <script type="module" src="auth.js?v=20260722-localpreview1"></script>
+</body>
+</html>
