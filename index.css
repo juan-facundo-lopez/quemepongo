@@ -498,11 +498,12 @@ body.auth-locked { overflow: hidden; }
 .recommendations-dialog[open]::backdrop { opacity: 1; }
 @starting-style { .recommendations-dialog[open] { opacity: 0; transform: translateY(20px); } .recommendations-dialog[open]::backdrop { opacity: 0; } }
 .recommendations-shell { height: 100%; padding: max(20px, env(safe-area-inset-top)) 16px max(26px, env(safe-area-inset-bottom)); overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; }
-.recommendations-header { position: relative; min-height: 42px; padding: 2px 45px 0 2px; }
+.recommendations-header { position: relative; }
+.recommendations-toolbar { position: sticky; z-index: 10; top: 0; min-height: 44px; margin: 0 -4px 13px; padding: 2px 4px; display: flex; align-items: center; justify-content: space-between; gap: 10px; background: rgba(248,250,252,.88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 .recommendations-heading h2 { margin: 6px 0 0; font: 750 clamp(1.65rem, 8vw, 2.25rem)/1.08 var(--font-display); letter-spacing: -.055em; }
 .recommendations-heading p { max-width: 55ch; margin: 8px 0 0; color: var(--color-text-sub); font-size: .78rem; line-height: 1.45; }
-.recommendations-close { position: absolute; z-index: 3; right: 0; top: 0; }
-.recommendations-back { min-height: 36px; margin: 0 0 13px; padding: 7px 10px 7px 7px; border: 0; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; color: var(--color-text-sub); background: rgba(43,45,66,.07); font-size: .68rem; font-weight: 700; cursor: pointer; }
+.recommendations-close { position: static; flex: 0 0 auto; margin-left: auto; }
+.recommendations-back { min-height: 40px; max-width: calc(100% - 52px); padding: 8px 13px 8px 9px; border: 1px solid rgba(43,45,66,.08); border-radius: 14px; display: inline-flex; align-items: center; gap: 6px; color: var(--color-text-main); background: rgba(255,255,255,.78); box-shadow: 0 6px 16px rgba(43,45,66,.08); font-size: .72rem; font-weight: 750; cursor: pointer; }
 .recommendations-back[hidden] { display: none; }
 .recommendations-back svg { width: 17px; height: 17px; }
 .recommendation-filters { margin: 19px -16px 0; padding: 0 16px 6px; display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; }
@@ -555,13 +556,13 @@ body.auth-locked { overflow: hidden; }
 .recommendation-spec span, .recommendation-spec strong { display: block; }
 .recommendation-spec span { color: var(--color-text-sub); font-size: .57rem; font-weight: 700; }
 .recommendation-spec strong { margin-top: 4px; overflow: hidden; font-size: .69rem; text-overflow: ellipsis; white-space: nowrap; }
-.recommendation-copy-search { width: 100%; min-height: 43px; margin-top: 10px; border: 1px solid rgba(132,94,247,.22); border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 7px; color: var(--color-windy); background: rgba(132,94,247,.08); font-size: .69rem; font-weight: 750; cursor: pointer; }
-.recommendation-copy-search svg { width: 16px; height: 16px; }
+.recommendation-google-search { width: 100%; min-height: 43px; margin-top: 10px; border: 1px solid rgba(132,94,247,.22); border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 7px; color: var(--color-windy); background: rgba(132,94,247,.08); font-size: .69rem; font-weight: 750; text-decoration: none; cursor: pointer; }
+.recommendation-google-search svg { width: 16px; height: 16px; }
 .recommendation-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 20px; }
 .recommendation-save { grid-column: 1 / -1; min-height: 46px; border: 0; border-radius: 15px; color: white; background: var(--color-text-main); box-shadow: 0 9px 20px rgba(43,45,66,.16); font-size: .72rem; font-weight: 750; cursor: pointer; }
 .recommendation-save.is-saved { color: #087f5b; background: rgba(18,184,134,.12); box-shadow: none; }
 .recommendation-feedback { min-height: 42px; padding: 8px; border: 1px solid rgba(43,45,66,.08); border-radius: 14px; color: var(--color-text-sub); background: rgba(43,45,66,.05); font-size: .65rem; font-weight: 700; cursor: pointer; }
-.wardrobe-insight-action:focus-visible, .recommendation-filters button:focus-visible, .recommendation-list-card:focus-visible, .recommendations-back:focus-visible, .recommendation-copy-search:focus-visible, .recommendation-save:focus-visible, .recommendation-feedback:focus-visible, .recommendations-empty button:focus-visible { outline: 3px solid rgba(132,94,247,.34); outline-offset: 3px; }
+.wardrobe-insight-action:focus-visible, .recommendation-filters button:focus-visible, .recommendation-list-card:focus-visible, .recommendations-back:focus-visible, .recommendation-google-search:focus-visible, .recommendation-save:focus-visible, .recommendation-feedback:focus-visible, .recommendations-empty button:focus-visible { outline: 3px solid rgba(132,94,247,.34); outline-offset: 3px; }
 .recommendations-toast { position: sticky; left: 0; right: 0; bottom: 4px; width: fit-content; max-width: calc(100% - 24px); min-height: 0; margin: 12px auto 0; padding: 0; border-radius: 999px; color: white; background: rgba(43,45,66,.92); box-shadow: 0 9px 24px rgba(43,45,66,.2); font-size: .65rem; font-weight: 700; text-align: center; opacity: 0; transform: translateY(8px); transition: opacity .2s ease, transform .2s ease, padding .2s ease; pointer-events: none; }
 .recommendations-toast.is-visible { padding: 9px 13px; opacity: 1; transform: translateY(0); }
 
@@ -617,6 +618,7 @@ body.auth-locked { overflow: hidden; }
 #weatherBg.night ~ .app-container .wardrobe-insight-metrics strong { color: white; }
 #weatherBg.night ~ .app-container .wardrobe-insight-metrics span, #weatherBg.night ~ .app-container .wardrobe-progress { background: rgba(255,255,255,.09); }
 #weatherBg.night ~ .recommendations-dialog { color: white; background: rgba(23,32,51,.97); }
+#weatherBg.night ~ .recommendations-dialog .recommendations-toolbar { background: rgba(23,32,51,.88); }
 #weatherBg.night ~ .recommendations-dialog .recommendations-heading p, #weatherBg.night ~ .recommendations-dialog .recommendation-list-copy > span:not(.recommendation-impact), #weatherBg.night ~ .recommendations-dialog .recommendation-detail-title p, #weatherBg.night ~ .recommendations-dialog .recommendation-section > p, #weatherBg.night ~ .recommendations-dialog .recommendation-detail-metric span { color: rgba(255,255,255,.62); }
 #weatherBg.night ~ .recommendations-dialog .recommendation-list-card, #weatherBg.night ~ .recommendations-dialog .recommendation-detail-metric { color: white; border-color: rgba(255,255,255,.1); background: rgba(255,255,255,.07); }
 #weatherBg.night ~ .recommendations-dialog .recommendation-list-card:first-child { background: linear-gradient(135deg, rgba(255,255,255,.09), rgba(132,94,247,.14)); }

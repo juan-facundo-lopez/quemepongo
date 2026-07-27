@@ -46,6 +46,8 @@ const AppState = {
   swappingOutfitSlot: null,
   recommendationFilter: 'all',
   selectedRecommendationId: null,
+  recommendationDetailOrigin: 'overview',
+  recommendationsReturnView: 'wardrobeView',
   recommendationFeedback: {},
   recommendationFeedbackRemote: false,
   recommendationFeedbackSyncing: false
@@ -697,8 +699,9 @@ function renderOutfitPieces() {
   const spec = AppState.outfitSpec;
   if (!pieces || !spec) return;
   const order = ['top', 'mid', 'outer', 'bottom', 'feet'];
-  const ownCount = order.filter((slot) => pieces[slot]?.item).length;
-  const hasAlternatives = order.some((slot) => {
+  const visibleOrder = order.filter((slot) => !pieces[slot]?.isOptional);
+  const ownCount = visibleOrder.filter((slot) => pieces[slot]?.item).length;
+  const hasAlternatives = visibleOrder.some((slot) => {
     const currentId = pieces[slot]?.item?.id;
     return getOutfitCandidates(slot).some((item) => item.id !== currentId);
   });
@@ -716,7 +719,7 @@ function renderOutfitPieces() {
       </button>
     </div>
     <div class="outfit-piece-grid">
-      ${order.map((slot) => renderOutfitPiece(pieces[slot], spec)).join('')}
+      ${visibleOrder.map((slot) => renderOutfitPiece(pieces[slot], spec)).join('')}
     </div>
   `;
 }
@@ -1024,7 +1027,7 @@ function initWardrobeInsights() {
   });
 
   elements.closeRecommendations.addEventListener('click', () => elements.recommendationsDialog.close());
-  elements.recommendationsBack.addEventListener('click', showRecommendationsOverview);
+  elements.recommendationsBack.addEventListener('click', handleRecommendationsBack);
   elements.recommendationsDialog.addEventListener('cancel', showRecommendationsOverview);
   elements.recommendationsDialog.addEventListener('close', showRecommendationsOverview);
   elements.recommendationsDialog.addEventListener('click', (event) => {
@@ -1054,7 +1057,10 @@ function initWardrobeInsights() {
       return;
     }
     const card = event.target.closest('[data-recommendation-id]');
-    if (card) showRecommendationDetail(card.dataset.recommendationId);
+    if (card) {
+      AppState.recommendationDetailOrigin = 'overview';
+      showRecommendationDetail(card.dataset.recommendationId);
+    }
   });
 
   elements.recommendationDetail.addEventListener('click', handleRecommendationDetailAction);
@@ -1343,6 +1349,8 @@ function renderWardrobeInsights() {
 
 function openRecommendationsDialog(filter = 'all', recommendationId = null) {
   if (!elements.recommendationsDialog || !globalThis.QMPRecommendations) return;
+  AppState.recommendationsReturnView = document.querySelector('.view.active')?.id || 'wardrobeView';
+  AppState.recommendationDetailOrigin = recommendationId ? 'source' : 'overview';
   AppState.recommendationFilter = filter;
   renderRecommendationsOverview();
   elements.recommendationsDialog.showModal();
@@ -1423,6 +1431,23 @@ function showRecommendationsOverview() {
   if (shell) shell.scrollTop = 0;
 }
 
+function handleRecommendationsBack() {
+  if (AppState.recommendationDetailOrigin === 'source') {
+    elements.recommendationsDialog.close();
+    return;
+  }
+  showRecommendationsOverview();
+}
+
+function recommendationsReturnLabel() {
+  const labels = {
+    homeView: 'Inicio',
+    wardrobeView: 'Mi ropa',
+    settingsView: 'Ajustes'
+  };
+  return labels[AppState.recommendationsReturnView] || 'Mi ropa';
+}
+
 function findRecommendation(recommendationId) {
   const current = analyzeWardrobeRecommendations(AppState.recommendationFilter)?.recommendations || [];
   const all = analyzeWardrobeRecommendations('all')?.recommendations || [];
@@ -1441,6 +1466,12 @@ function showRecommendationDetail(recommendationId) {
 
   AppState.selectedRecommendationId = recommendation.id;
   elements.recommendationsBack.hidden = false;
+  const backDestination = AppState.recommendationDetailOrigin === 'source'
+    ? recommendationsReturnLabel()
+    : 'recomendaciones';
+  const backLabel = elements.recommendationsBack.querySelector('span');
+  if (backLabel) backLabel.textContent = `Volver a ${backDestination}`;
+  elements.recommendationsBack.setAttribute('aria-label', `Volver a ${backDestination}`);
   elements.recommendationsHeading.hidden = true;
   elements.recommendationsOverview.hidden = true;
   elements.recommendationDetail.hidden = false;
@@ -1493,10 +1524,10 @@ function showRecommendationDetail(recommendationId) {
           <div class="recommendation-spec"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value || 'Flexible')}</strong></div>
         `).join('')}
       </div>
-      <button class="recommendation-copy-search" type="button" data-recommendation-action="copy">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
-        Copiar descripción para buscar
-      </button>
+      <a class="recommendation-google-search" href="https://www.google.com/search?q=${encodeURIComponent(recommendation.searchText)}" target="_blank" rel="noopener noreferrer" aria-label="Buscar esta recomendación en Google; se abre en una pestaña nueva">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>
+        Buscar en Google
+      </a>
     </section>
 
     <div class="recommendation-actions">
@@ -1518,12 +1549,6 @@ async function handleRecommendationDetailAction(event) {
   const recommendation = findRecommendation(AppState.selectedRecommendationId);
   if (!recommendation) return;
   const action = button.dataset.recommendationAction;
-
-  if (action === 'copy') {
-    await copyRecommendationSearch(recommendation.searchText);
-    showRecommendationsToast('Descripción copiada. Ya podés buscarla donde prefieras.');
-    return;
-  }
 
   if (action === 'save') {
     const isSaved = AppState.recommendationFeedback[recommendation.id]?.status === 'saved';
@@ -1567,22 +1592,6 @@ async function handleRecommendationDetailAction(event) {
     } catch (error) {
       showRecommendationsToast('Actualizado en este dispositivo. Tu cuenta se sincronizará al reconectar.');
     }
-  }
-}
-
-async function copyRecommendationSearch(text) {
-  try {
-    await navigator.clipboard.writeText(text);
-  } catch (_) {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.setAttribute('readonly', '');
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    document.execCommand('copy');
-    textarea.remove();
   }
 }
 

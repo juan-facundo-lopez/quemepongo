@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="index.css?v=20260723-wardrobe2">
+  <link rel="stylesheet" href="index.css?v=20260727-navigation1">
 </head>
 <body>
   <div id="weatherBg" class="clear" aria-hidden="true">
@@ -306,17 +306,19 @@
 
   <dialog class="recommendations-dialog" id="recommendationsDialog" aria-labelledby="recommendationsTitle">
     <div class="recommendations-shell">
-      <header class="recommendations-header">
+      <div class="recommendations-toolbar">
         <button class="recommendations-back" id="recommendationsBack" type="button" aria-label="Volver a las recomendaciones" hidden>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-          <span>Volver</span>
+          <span>Volver a recomendaciones</span>
         </button>
+        <button class="dialog-close recommendations-close" id="closeRecommendations" type="button" aria-label="Cerrar recomendaciones">×</button>
+      </div>
+      <header class="recommendations-header">
         <div class="recommendations-heading" id="recommendationsHeading">
           <span class="eyebrow">Tu armario, mejor aprovechado</span>
           <h2 id="recommendationsTitle">Mejorá tu armario</h2>
           <p>Priorizamos las prendas que sumarían más combinaciones con lo que ya tenés.</p>
         </div>
-        <button class="dialog-close recommendations-close" id="closeRecommendations" type="button" aria-label="Cerrar recomendaciones">×</button>
       </header>
 
       <section class="recommendations-overview" id="recommendationsOverview">
@@ -516,7 +518,7 @@
 
   <script src="pwa.js?v=20260723-wardrobe2"></script>
   <script src="recommendations.js?v=20260723-wardrobe2"></script>
-  <script src="app.js?v=20260723-wardrobe2"></script>
+  <script src="app.js?v=20260727-navigation1"></script>
   <script type="module" src="auth.js?v=20260722-localpreview1"></script>
 </body>
 </html>

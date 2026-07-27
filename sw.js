@@ -1,12 +1,12 @@
 'use strict';
 
-const CACHE_NAME = 'qmp-shell-v21';
+const CACHE_NAME = 'qmp-shell-v22';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
-  '/index.css?v=20260723-wardrobe2',
+  '/index.css?v=20260727-navigation1',
   '/recommendations.js?v=20260723-wardrobe2',
-  '/app.js?v=20260723-wardrobe2',
+  '/app.js?v=20260727-navigation1',
   '/auth.js?v=20260722-localpreview1',
   '/pwa.js?v=20260723-wardrobe2',
   '/manifest.json?v=20260721-pwa1',
